@@ -1,4 +1,4 @@
-FROM ubuntu:wily
+FROM ubuntu:xenial
 MAINTAINER Alexandre Andrade <kaniabi@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -22,7 +22,7 @@ RUN echo "root:chucknorris" | chpasswd  &&\
     curl -s https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py  &&\
     python /tmp/get-pip.py  &&\
     rm /tmp/get-pip.py  &&\
-    pip -q install virtualenv
+    pip -q install virtualenvwrapper invoke colorama
 
 # TIMEZONE: Configure the docker-image timezone.
 RUN cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime  &&\
@@ -34,7 +34,7 @@ RUN cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime  &&\
 ### TODO: Split this into two images... base (above) and jenkins-slave (bellow)
 
 ENV HOME /home/jenkins-slave
-ENV JENKINS_SWARM_VERSION 2.0
+ENV JENKINS_SWARM_VERSION 3.0
 
 # USER: Jenkins-slave
 RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $HOME  &&\
