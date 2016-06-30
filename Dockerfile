@@ -34,7 +34,7 @@ RUN cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime  &&\
 ### TODO: Split this into two images... base (above) and jenkins-slave (bellow)
 
 ENV HOME /home/jenkins-slave
-ENV JENKINS_SWARM_VERSION 3.0
+ENV JENKINS_SWARM_VERSION 2.1
 
 # USER: Jenkins-slave
 RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $HOME  &&\

@@ -1,5 +1,5 @@
 NAME = kaniabi/jenkins-slave
-VERSION = 0.2.1
+VERSION = 0.3.1
 
 .PHONY: all build test latest release
 
@@ -23,6 +23,11 @@ bash:
 
 build:
 	sudo docker build -t $(NAME):$(VERSION) .
+
+build-locally:
+	sudo docker build -t registry.axado.com.br:5000/jenkins-slave:$(VERSION) -t registry.axado.com.br:5000/jenkins-slave:latest .
+	sudo docker push registry.axado.com.br:5000/jenkins-slave:$(VERSION)
+	sudo docker push registry.axado.com.br:5000/jenkins-slave:latest
 
 latest:
 	sudo docker tag $(NAME):$(VERSION) $(NAME):latest
