@@ -1,15 +1,7 @@
-FROM ubuntu:xenial
+FROM phusion/baseimage:latest
 MAINTAINER Alexandre Andrade <kaniabi@gmail.com>
 
-ENV DEBIAN_FRONTEND noninteractive
-
-ENV TIMEZONE America/Sao_Paulo
-
-# List of packages, separated by spaces, to update upon image STARTUP (see docker-entrypoint.sh).
-ENV RUNTIME_PACKAGES_SYSTEM=""
-ENV RUNTIME_PACKAGES_RUBY=""
-ENV RUNTIME_PACKAGES_NODEJS=""
-ENV RUNTIME_PACKAGES_PYTHON=""
+ENV DEBIAN_FRONTEND=noninteractive TIMEZONE=America/Sao_Paulo
 
 # PACKAGES-SYSTEM:
 # * Install netstat to allow (jenkins) connection health check with: `netstat -tan | grep ESTABLISHED`
@@ -24,36 +16,42 @@ RUN echo "root:chucknorris" | chpasswd  &&\
     rm /tmp/get-pip.py  &&\
     pip -q install virtualenvwrapper invoke colorama
 
+
 # TIMEZONE: Configure the docker-image timezone.
 RUN cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime  &&\
     echo ${TIMEZONE} > /etc/timezone
 
 
+### DOCKER ###
+RUN apt-get install -y apt-transport-https ca-certificates  &&\
+    echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" | sudo tee /etc/apt/sources.list.d/docker.list  &&\
+    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D  &&\
+    sudo apt-get update &&\
+    sudo apt-get install -y docker-engine
+
 
 ### JENKINS-SLAVE ###
-### TODO: Split this into two images... base (above) and jenkins-slave (bellow)
-
-ENV HOME /home/jenkins-slave
-ENV JENKINS_SWARM_VERSION 2.1
+ENV JENKINS_SLAVE_HOME="/home/jenkins-slave"
+ENV JENKINS_SLAVE_PARAMS=""
+ENV JENKINS_SWARM_VERSION 2.2
 
 # USER: Jenkins-slave
-RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $HOME  &&\
+RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $JENKINS_SLAVE_HOME  &&\
     echo "jenkins-slave:jenkins" | chpasswd  &&\
     adduser jenkins-slave sudo  &&\
     echo "jenkins-slave ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # SWARM-CLIENT: Configure JAR file for swarm-client
-RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar  &&\
+RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar \
+    http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar  &&\
     chmod 755 /usr/share/jenkins
-
-USER jenkins-slave
-VOLUME ${HOME}
 
 # Getting grid of errors on Jenkins job output:
 #   tput: No value for $TERM and no -T specified
-# Experimenting with values. Trying vt100 to check if we keep the colored output.
 ENV TERM vt100
 
-# ENTRY-POINT
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+VOLUME ${JENKINS_SLAVE_HOME}
+
+# Aditional deamon: swarm-client
+RUN mkdir /etc/service/swarm-client
+ADD swarm-client.sh /etc/service/swarm-client/run

@@ -4,17 +4,16 @@
 
 # Jenkins Swarm Slave on Docker
 
-A customizable jenkins-slave docker image, with python, ruby and nodejs.
+A jenkins-slave image with:
+ 
+* Base image phusion/baseimage (Ubuntu);
+* Jenkins Swarm Client (v2.2): `/etc/service/swarm-client/run`;
+* Docker in Docker (remember to map /var/run/docker.sock);
 
 ```
 $ docker run \
-    -e RUNTIME_PACKAGES_SYSTEM="zsh libpq-dev mysql-client-5.6 libmysqlclient-dev" \
-    -e RUNTIME_PACKAGES_RUBY="sass compass" \
-    -e RUNTIME_PACKAGES_PYTHON="django" \
-    -e RUNTIME_PACKAGES_NODEJS="bower" \
-    kaniabi/jenkins-slave:latest \
-      -master=http://<your jenkins server>:8080 \
-      -executors=1 \
-      -name=<a friendly name>
+    -e JENKINS_SLAVE_PARAMS="-master=http://SERVER:8080 -executors=1 -name=SLAVE1 -labels='LABEL1' -mode=exclusive" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    kaniabi/jenkins-slave:latest
 ```
 

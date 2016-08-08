@@ -1,5 +1,5 @@
 NAME = kaniabi/jenkins-slave
-VERSION = 0.3.1
+VERSION = 0.4.0
 
 .PHONY: all build test latest release
 
@@ -7,27 +7,24 @@ all: build
 
 run:
 	sudo docker run \
-	-e RUNTIME_PACKAGES_SYSTEM="zsh libpq-dev mysql-client-5.6 libmysqlclient-dev" \
-	-e RUNTIME_PACKAGES_RUBY="sass compass" \
-	-e RUNTIME_PACKAGES_NODEJS="bower" \
-	-e RUNTIME_PACKAGES_PYTHON="" \
-	--link mysql \
-	--rm \
-	--name jenkins-slave $(NAME):$(VERSION) \
-	-master=http://54.207.132.204:8080 -executors=1 -name=$HOST
+	-e JENKINS_SLAVE_HOME=/home/jenkins-slave \
+	-e JENKINS_SLAVE_PARAMS="-master=http://hack-01:9090 -executors=1 -name=hack-99" \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	--link mysql --rm --name jenkins-slave \
+	registry.opexe:5000/jenkins-slave:$(VERSION)
 
 bash:
-	#sudo docker kill jenkins-slave-bash
-	#sudo docker rm jenkins-slave-bash
-	sudo docker run -i -t --rm --name jenkins-slave-bash $(NAME):$(VERSION) /bin/bash
+	sudo docker kill jenkins-slave-bash | true
+	sudo docker rm jenkins-slave-bash | true
+	sudo docker run -it --rm --name jenkins-slave-bash $(NAME):$(VERSION) /bin/bash
 
 build:
 	sudo docker build -t $(NAME):$(VERSION) .
 
 build-locally:
-	sudo docker build -t registry.axado.com.br:5000/jenkins-slave:$(VERSION) -t registry.axado.com.br:5000/jenkins-slave:latest .
-	sudo docker push registry.axado.com.br:5000/jenkins-slave:$(VERSION)
-	sudo docker push registry.axado.com.br:5000/jenkins-slave:latest
+	sudo docker build -t registry.opexe:5000/jenkins-slave:$(VERSION) -t registry.opexe:5000/jenkins-slave:latest .
+	sudo docker push registry.opexe:5000/jenkins-slave:$(VERSION)
+	sudo docker push registry.opexe:5000/jenkins-slave:latest
 
 latest:
 	sudo docker tag $(NAME):$(VERSION) $(NAME):latest
