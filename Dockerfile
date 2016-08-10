@@ -29,9 +29,9 @@ RUN apt-get install -y net-tools curl sudo git default-jre python-dev nodejs npm
 ### DOCKER ###
 RUN apt-get install -y apt-transport-https ca-certificates  &&\
     echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" | sudo tee /etc/apt/sources.list.d/docker.list  &&\
-    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D  &&\
-    sudo apt-get update &&\
-    sudo apt-get install -y docker-engine
+    apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D  &&\
+    apt-get update &&\
+    apt-get install -y docker-engine
 
 
 ### JENKINS-SLAVE ###
