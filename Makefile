@@ -1,5 +1,5 @@
 NAME = kaniabi/jenkins-slave
-VERSION = 0.4.0
+VERSION = 0.4.1
 
 .PHONY: all build test latest release
 
@@ -19,7 +19,7 @@ bash:
 	sudo docker run -it --rm --name jenkins-slave-bash $(NAME):$(VERSION) /bin/bash
 
 build:
-	sudo docker build -t $(NAME):$(VERSION) .
+	sudo docker build -t $(NAME):$(VERSION) -t $(NAME):latest .
 
 build-locally:
 	sudo docker build -t registry.opexe:5000/jenkins-slave:$(VERSION) -t registry.opexe:5000/jenkins-slave:latest .

@@ -1,25 +1,29 @@
 FROM phusion/baseimage:latest
 MAINTAINER Alexandre Andrade <kaniabi@gmail.com>
 
-ENV DEBIAN_FRONTEND=noninteractive TIMEZONE=America/Sao_Paulo
+ENV DEBIAN_FRONTEND=noninteractive
 
-# PACKAGES-SYSTEM:
+### TIMEZONE: Configure the docker-image timezone.
+ENV TIMEZONE=America/Sao_Paulo
+RUN cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime  &&\
+    echo ${TIMEZONE} > /etc/timezone
+
+### Update and root password.
+RUN echo "root:chucknorris" | chpasswd  &&\
+    apt-get update
+
+
+### PACKAGES-SYSTEM:
 # * Install netstat to allow (jenkins) connection health check with: `netstat -tan | grep ESTABLISHED`
 # * Install nodejs, fixing the executable on /usr/bin/node
-RUN echo "root:chucknorris" | chpasswd  &&\
-    apt-get update  &&\
-    apt-get install -y net-tools curl sudo git default-jre python-dev nodejs npm ruby-dev rubygems  &&\
+RUN apt-get install -y net-tools curl sudo git default-jre python-dev nodejs npm ruby-dev rubygems  &&\
     npm config set prefix /usr/local  &&\
     ln -s /usr/bin/nodejs /usr/bin/node  &&\
     curl -s https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py  &&\
     python /tmp/get-pip.py  &&\
     rm /tmp/get-pip.py  &&\
+    pip install -u pip  &&\
     pip -q install virtualenvwrapper invoke colorama
-
-
-# TIMEZONE: Configure the docker-image timezone.
-RUN cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime  &&\
-    echo ${TIMEZONE} > /etc/timezone
 
 
 ### DOCKER ###
@@ -35,7 +39,7 @@ ENV JENKINS_SLAVE_HOME="/home/jenkins-slave"
 ENV JENKINS_SLAVE_PARAMS=""
 ENV JENKINS_SWARM_VERSION 2.2
 
-# USER: Jenkins-slave
+# USER: jenkins-slave
 RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $JENKINS_SLAVE_HOME  &&\
     echo "jenkins-slave:jenkins" | chpasswd  &&\
     adduser jenkins-slave sudo  &&\
@@ -46,11 +50,10 @@ RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERS
     http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar  &&\
     chmod 755 /usr/share/jenkins
 
-# Getting grid of errors on Jenkins job output:
+# Getting rid of errors on Jenkins job output:
 #   tput: No value for $TERM and no -T specified
 ENV TERM vt100
-
-VOLUME ${JENKINS_SLAVE_HOME}
+VOLUME ["${JENKINS_SLAVE_HOME}"]
 
 # Aditional deamon: swarm-client
 RUN mkdir /etc/service/swarm-client

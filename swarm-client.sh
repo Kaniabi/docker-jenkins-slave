@@ -2,7 +2,7 @@
 
 function _run-it {
     echo Running $1
-    exec /sbin/setuser jenkins-slave $1 >> /var/log/jenkins-slave.log 2>&1
+    exec /sbin/setuser jenkins-slave $1
 }
 
 JAR=`ls -1 /usr/share/jenkins/swarm-client-*.jar | tail -n 1`
