@@ -1,5 +1,5 @@
 NAME = kaniabi/jenkins-slave
-VERSION = 0.4.1
+VERSION = 0.4.2
 
 .PHONY: all build test latest release
 

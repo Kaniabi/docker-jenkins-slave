@@ -22,7 +22,7 @@ RUN apt-get install -y net-tools curl sudo git default-jre python-dev nodejs npm
     curl -s https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py  &&\
     python /tmp/get-pip.py  &&\
     rm /tmp/get-pip.py  &&\
-    pip install -u pip  &&\
+    pip install -U pip  &&\
     pip -q install virtualenvwrapper invoke colorama
 
 
@@ -53,7 +53,6 @@ RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERS
 # Getting rid of errors on Jenkins job output:
 #   tput: No value for $TERM and no -T specified
 ENV TERM vt100
-VOLUME ["${JENKINS_SLAVE_HOME}"]
 
 # Aditional deamon: swarm-client
 RUN mkdir /etc/service/swarm-client
