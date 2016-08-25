@@ -47,7 +47,7 @@ RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $JENKINS_SLAVE_HOME  &&\
 
 # SWARM-CLIENT: Configure JAR file for swarm-client
 RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar \
-    http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar  &&\
+    https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar  &&\
     chmod 755 /usr/share/jenkins
 
 # Getting rid of errors on Jenkins job output:
