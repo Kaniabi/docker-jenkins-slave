@@ -16,14 +16,17 @@ RUN echo "root:chucknorris" | chpasswd  &&\
 ### PACKAGES-SYSTEM:
 # * Install netstat to allow (jenkins) connection health check with: `netstat -tan | grep ESTABLISHED`
 # * Install nodejs, fixing the executable on /usr/bin/node
-RUN apt-get install -y net-tools curl sudo git default-jre python-dev nodejs npm ruby-dev rubygems  &&\
+RUN apt-get install -y net-tools curl sudo git default-jre python-dev python3-dev nodejs npm ruby-dev rubygems  &&\
     npm config set prefix /usr/local  &&\
     ln -s /usr/bin/nodejs /usr/bin/node  &&\
     curl -s https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py  &&\
     python /tmp/get-pip.py  &&\
+    python3 /tmp/get-pip.py  &&\
     rm /tmp/get-pip.py  &&\
     pip install -U pip  &&\
-    pip -q install virtualenvwrapper invoke colorama
+    pip -q install virtualenvwrapper invoke colorama &&\
+    pip3 install -U pip  &&\
+    pip3 -q install virtualenvwrapper invoke colorama
 
 
 ### DOCKER ###
@@ -37,7 +40,6 @@ RUN apt-get install -y apt-transport-https ca-certificates  &&\
 ### JENKINS-SLAVE ###
 ENV JENKINS_SLAVE_HOME="/home/jenkins-slave"
 ENV JENKINS_SLAVE_PARAMS=""
-ENV JENKINS_SWARM_VERSION 2.2
 
 # USER: jenkins-slave
 RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $JENKINS_SLAVE_HOME  &&\
@@ -45,15 +47,27 @@ RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $JENKINS_SLAVE_HOME  &&\
     adduser jenkins-slave sudo  &&\
     echo "jenkins-slave ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# SWARM-CLIENT: Configure JAR file for swarm-client
-RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar \
-    https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar  &&\
-    chmod 755 /usr/share/jenkins
-
 # Getting rid of errors on Jenkins job output:
 #   tput: No value for $TERM and no -T specified
 ENV TERM vt100
 
-# Aditional deamon: swarm-client
-RUN mkdir /etc/service/swarm-client
-ADD swarm-client.sh /etc/service/swarm-client/run
+
+## SWARM-CLIENT: Configure JAR file for swarm-client
+#ARG JENKINS_SWARM_VERSION=2.2
+#RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar \
+#    https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar  &&\
+#    chmod 755 /usr/share/jenkins
+#
+## ... configure pushion daemon
+#RUN mkdir /etc/service/swarm-client
+#ADD swarm-client.sh /etc/service/swarm-client/run
+
+
+# JNPL-CLIENT: Configure JAR file for jnpl-client
+ARG JENKINS_JNPL_VERSION=2.9
+RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${JENKINS_JNPL_VERSION}/remoting-${JENKINS_JNPL_VERSION}.jar \
+  && chmod 755 /usr/share/jenkins \
+  && chmod 644 /usr/share/jenkins/slave.jar
+
+COPY jnpl-client.sh /usr/local/bin/jenkins-slave
+ENTRYPOINT ["/usr/local/bin/jenkins-slave"]
