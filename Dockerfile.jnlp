@@ -52,11 +52,11 @@ RUN useradd -m jenkins-slave -c "Jenkins Slave User" -d $JENKINS_SLAVE_HOME  &&\
 ENV TERM vt100
 
 
-# JNPL-CLIENT: Configure JAR file for jnpl-client
-ARG JENKINS_JNPL_VERSION=2.9
-RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${JENKINS_JNPL_VERSION}/remoting-${JENKINS_JNPL_VERSION}.jar \
+# JNLP-CLIENT: Configure JAR file for jnlp-client
+ARG JENKINS_JNLP_VERSION=2.9
+RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${JENKINS_JNLP_VERSION}/remoting-${JENKINS_JNLP_VERSION}.jar \
   && chmod 755 /usr/share/jenkins \
   && chmod 644 /usr/share/jenkins/slave.jar
 
-COPY jnpl-client.sh /usr/local/bin/jenkins-slave
+COPY jnlp-client.sh /usr/local/bin/jenkins-slave
 ENTRYPOINT ["/usr/local/bin/jenkins-slave"]
