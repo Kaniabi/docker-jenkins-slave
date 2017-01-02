@@ -20,12 +20,12 @@ RUN apt-get install -y net-tools curl sudo git default-jre python-dev python3-de
     npm config set prefix /usr/local  &&\
     ln -s /usr/bin/nodejs /usr/bin/node  &&\
     curl -s https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py  &&\
-    python2 /tmp/get-pip.py  &&\
-    pip2 install -U pip  &&\
-    pip2 -q install virtualenvwrapper invoke colorama  &&\
     python3 /tmp/get-pip.py  &&\
     pip3 install -U pip  &&\
     pip3 -q install virtualenvwrapper invoke colorama  &&\
+    python2 /tmp/get-pip.py  &&\
+    pip2 install -U pip  &&\
+    pip2 -q install virtualenvwrapper invoke colorama  &&\
     rm /tmp/get-pip.py
 
 
@@ -38,7 +38,7 @@ RUN apt-get install -y apt-transport-https ca-certificates  &&\
 
 
 ### JENKINS-SLAVE ###
-ENV JENKINS_SLAVE_HOME="/home/jenkins-slave"
+ENV JENKINS_SLAVE_HOME="/home/jenkins"
 ENV JENKINS_SLAVE_PARAMS=""
 
 # USER: jenkins-slave
