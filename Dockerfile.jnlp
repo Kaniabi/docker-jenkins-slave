@@ -20,13 +20,13 @@ RUN apt-get install -y net-tools curl sudo git default-jre python-dev python3-de
     npm config set prefix /usr/local  &&\
     ln -s /usr/bin/nodejs /usr/bin/node  &&\
     curl -s https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py  &&\
-    python /tmp/get-pip.py  &&\
+    python2 /tmp/get-pip.py  &&\
+    pip2 install -U pip  &&\
+    pip2 -q install virtualenvwrapper invoke colorama  &&\
     python3 /tmp/get-pip.py  &&\
-    rm /tmp/get-pip.py  &&\
-    pip install -U pip  &&\
-    pip -q install virtualenvwrapper invoke colorama &&\
     pip3 install -U pip  &&\
-    pip3 -q install virtualenvwrapper invoke colorama
+    pip3 -q install virtualenvwrapper invoke colorama  &&\
+    rm /tmp/get-pip.py
 
 
 ### DOCKER ###
